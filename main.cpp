@@ -1,44 +1,72 @@
 #include <iostream>
 #include <sstream>
 
+double parseFactor(std::istringstream &iss);
+
+double parseTerm(std::istringstream &iss);
+
 /**
- * @brief Parses and evaluates a factor consisting of numbers or chains connected by '*' or '/' operators.
+ * @brief Parses and evaluates a factor in a mathematical expression.
  *
- * This function processes a factor by first reading a number from the input stream and then
- * iteratively checking for '*' or '/' operators to combine subsequent numbers into the result.
- * It stops parsing when no more '*' or '/' operators are found in the input stream.
- * If a division by zero is encountered, the program outputs an error message and terminates.
+ * This function processes a factor, which can either be a number or a sub-expression
+ * enclosed in parentheses. It supports multiplication and division operations.
+ * If parentheses are encountered, the function recursively evaluates the expression
+ * within them. Division by zero results in an error message and program termination.
  *
  * @param iss A reference to the input string stream containing the mathematical expression.
  * @return double The evaluated result of the factor.
  */
 double parseFactor(std::istringstream &iss)
 {
-    double value;
-    iss >> value; // Read the first number in the factor
+    // Skip whitespace characters
+    while (iss.peek() == ' ') iss.get();
 
-    while (iss)
+    // Check if the factor starts with an opening parenthesis
+    if (iss.peek() == '(')
     {
-        // Peek at the next character to check for '*' or '/' operators
-        if (const char op = iss.peek(); op == '*' || op == '/')
+        iss.get(); // Consume the '(' character
+        const double value = parseTerm(iss); // Recursively evaluate the term within parentheses
+
+        // Skip whitespace characters
+        while (iss.peek() == ' ') iss.get();
+
+        // Ensure the closing parenthesis is present
+        if (iss.get() != ')')
         {
-            iss.get(); // Consume the operator
-            double next;
-            iss >> next; // Read the next number
-            if (op == '*') value *= next; // Multiply if operator is '*'
-            else
-            {
-                if (next == 0) // Check for division by zero
-                {
-                    std::cerr << "Division durch Null!" << std::endl;
-                    exit(1); // Terminate the program
-                }
-                value /= next; // Divide if operator is '/'
-            }
+            std::cerr << "Fehlende schließende Klammer!" << std::endl;
+            exit(1); // Terminate the program if a closing parenthesis is missing
         }
-        else break; // Exit the loop if no '*' or '/' operator is found
+        return value; // Return the evaluated value of the sub-expression
     }
-    return value; // Return the evaluated result of the factor
+    else
+    {
+        double value;
+        iss >> value; // Read the numeric value of the factor
+        while (iss)
+        {
+            // Skip whitespace characters
+            while (iss.peek() == ' ') iss.get();
+
+            // Check for multiplication or division operators
+            if (const char op = iss.peek(); op == '*' || op == '/')
+            {
+                iss.get(); // Consume the operator
+                const double next = parseFactor(iss); // Recursively parse the next factor
+                if (op == '*') value *= next; // Perform multiplication
+                else
+                {
+                    if (next == 0) // Check for division by zero
+                    {
+                        std::cerr << "Division durch Null!" << std::endl;
+                        exit(1); // Terminate the program on division by zero
+                    }
+                    value /= next; // Perform division
+                }
+            }
+            else break; // Exit the loop if no '*' or '/' operator is found
+        }
+        return value; // Return the evaluated result of the factor
+    }
 }
 
 /**
