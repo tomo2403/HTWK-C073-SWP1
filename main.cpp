@@ -115,7 +115,8 @@ int main()
     std::string input;
 
     // Prompt the user to enter a mathematical expression
-    std::cout << "Aufgabe eingeben (z.B. 3 + 4 * 2 - 1): ";
+    std::cout << "Praktischer Taschenrechner für Taschen-unpraktische Geräte" << std::endl;
+    std::cout << "Aufgabe eingeben [z.B. 3 + 4 * (2 - 1)]: ";
     std::getline(std::cin, input); // Read the entire input line
 
     // Create a string stream from the input for parsing
